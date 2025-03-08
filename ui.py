@@ -13,8 +13,33 @@ class ObjectWidget(QWidget):
     def __init__(self, parent=None, main_window=None):
         super(ObjectWidget, self).__init__(parent)
         self.main_window = main_window
-
-        # Create all UI components
+        
+        # Added global stylesheet for modern, polished look
+        self.setStyleSheet("""
+            QWidget { 
+                background-color: #f9f9f9; 
+                font-family: 'Segoe UI', sans-serif; 
+            }
+            QPushButton { 
+                background-color: #0078d7; 
+                color: white; 
+                border: none; 
+                border-radius: 4px; 
+                padding: 6px 12px; 
+            }
+            QPushButton:hover { 
+                background-color: #005a9e; 
+            }
+            QLineEdit, QSpinBox, QComboBox { 
+                border: 1px solid #ccc; 
+                border-radius: 4px; 
+                padding: 4px; 
+            }
+            QLabel { 
+                color: #333333; 
+            }
+        """)
+        
         self.create_function_section()
         self.create_scaling_section()
         self.create_limits_section()
@@ -132,6 +157,9 @@ class ObjectWidget(QWidget):
     def setup_layout(self):
         """Position widgets in the layout"""
         gbox = QGridLayout()
+        # Set modern margins and spacing
+        gbox.setContentsMargins(15, 15, 15, 15)
+        gbox.setSpacing(10)
         
         # Function section
         gbox.addWidget(self.l_function_title, 1, 0, 1, 2)
