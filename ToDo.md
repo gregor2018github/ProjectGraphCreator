@@ -5,4 +5,5 @@
  
 ### Done ✓
 
-- [x] 
+- [x] Many of the colormaps do not work with the function design, they have to be filtered out
+- [x] Refactored the config file to include more hardcoded selections

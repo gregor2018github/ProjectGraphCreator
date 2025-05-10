@@ -1,8 +1,12 @@
-# CONSTANTS
+# starting camera settings
 FOV = 45
 CAMERA_DISTANCE = 20
 WINDOW_SIZE = (1500, 900)
 WINDOW_POS = (100, 100)
+
+# start function is preselected and will run when the program starts
+START_FUNCTION = "a * X**2 + b * Y**2 + c"
+
 # following functions are handpicked to showcase the functionality of the program
 EXAMPLE_FUNCTIONS  = [  '(a * np.cos(np.pi * X) * np.cos(np.pi * Y) + b * np.sin(np.pi * X) * np.sin(np.pi * Y)) / (1 + c * np.sin(2 * np.pi * X) * np.sin(np.pi * Y))',
                         'a * (1 + Y * np.cos(np.pi * X)) * np.cos(2 * np.pi * X) + b * (1 + Y * np.cos(np.pi * X)) * np.sin(2 * np.pi * X) + c * Y * np.sin(np.pi * X)',
@@ -60,3 +64,73 @@ ALLOWED_CALCULATIONS = ["np.arcsinh", "np.arccosh", "np.arctanh",
                         "np.sin", "np.cos", "np.tan",
                         "np.sqrt", "np.exp", "np.log", "np.abs", 
                         "np.pi", "np.e"]
+
+# Style sheet for PyQt6 widgets
+STYLE_SHEET = """
+                 QWidget { 
+                     background-color: #f9f9f9; 
+                     font-family: 'Segoe UI', sans-serif; 
+                 }
+                 QPushButton { 
+                     background-color: #0078d7; 
+                     color: white; 
+                     border: none; 
+                     border-radius: 4px; 
+                     padding: 6px 12px; 
+                 }
+                 QPushButton:hover { 
+                     background-color: #005a9e; 
+                 }
+                 QLineEdit, QSpinBox, QComboBox { 
+                     border: 1px solid #ccc; 
+                     border-radius: 4px; 
+                     padding: 4px; 
+                 }
+                 QLabel { 
+                     color: #333333; 
+                 }
+              """
+
+# dispayed in the UI
+INFO_TEXT = ("You must use the following variables in your equation:\n"
+             "X, Y, a, b, c\nOther variables are not allowed.\n\n"
+             "You can use the following np calculations in your formula:\n"
+             "np.sqrt(), np.exp(), np.log(), np.abs(), np.pi(), np.e()\n"
+             "np.arctan(), np.arcsin(), np.arccos(), np.arccosh(), np.arcsinh(), \n"
+             "np.arctanh(), np.sinh(), np.cosh(), np.tanh(), np.sin(), np.cos(), np.tan()\n\n"
+             "Example functions are available to show you the possibilities.")
+
+# Speed controls
+SPEED_OPTIONS = ["Speed = 5 %", 
+                 "Speed = 10 %", 
+                 "Speed = 25 %", 
+                 "Speed = 50 %", 
+                 "Speed = 100 %", 
+                 "Speed = 150 %", 
+                 "Speed = 200 %"]
+
+# Possible colormaps for the plot, some others are not compatible with the program
+ALLOWED_COLORMAPS = ["GrBu",
+                     "GrBu_d",
+                     "PuGr",
+                     "RdBu",
+                     "RdYeBuCy",
+                     "autumn",
+                     "blues",
+                     "cool",
+                     "coolwarm",
+                     "cubehelix",
+                     "diverging",
+                     "greens",
+                     "hsl",
+                     "husl",
+                     "light_blues",
+                     "orange",
+                     "reds",
+                     "single_hue",
+                     "spring",
+                     "summer",
+                     "viridis"]
+
+# Starting colormap
+DEFAULT_CMAP = "viridis"

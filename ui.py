@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (QVBoxLayout, QPushButton, QWidget, QSplitter, QLabe
 from vispy import scene
 from vispy.color.colormap import get_colormaps
 
-from constants import FOV, CAMERA_DISTANCE, EXAMPLE_FUNCTIONS, ALLOWED_CALCULATIONS
+import config
 from logic import FunctionPlotter
 
 class ObjectWidget(QWidget):
@@ -15,30 +15,7 @@ class ObjectWidget(QWidget):
         self.main_window = main_window
         
         # Added global stylesheet for modern, polished look
-        self.setStyleSheet("""
-            QWidget { 
-                background-color: #f9f9f9; 
-                font-family: 'Segoe UI', sans-serif; 
-            }
-            QPushButton { 
-                background-color: #0078d7; 
-                color: white; 
-                border: none; 
-                border-radius: 4px; 
-                padding: 6px 12px; 
-            }
-            QPushButton:hover { 
-                background-color: #005a9e; 
-            }
-            QLineEdit, QSpinBox, QComboBox { 
-                border: 1px solid #ccc; 
-                border-radius: 4px; 
-                padding: 4px; 
-            }
-            QLabel { 
-                color: #333333; 
-            }
-        """)
+        self.setStyleSheet(config.STYLE_SHEET)
         
         self.create_function_section()
         self.create_scaling_section()
@@ -57,7 +34,7 @@ class ObjectWidget(QWidget):
         self.change_function_button.clicked.connect(self.pick_example_function)
 
         self.l_function_label = QLabel("Define Your Own Function: Z = ...           (must include X, Y, a, b, c)")
-        self.function_input = QLineEdit("a * X**2 + b * Y**2 + c")
+        self.function_input = QLineEdit(config.START_FUNCTION)
         self.function_input.setReadOnly(False)
         
         self.l_function_refresher = QPushButton("Refresh")
@@ -84,21 +61,17 @@ class ObjectWidget(QWidget):
         self.scaling_rule_c = QComboBox(self)
         self.scaling_rule_c.addItems(["c = sin(t)", "c = cos(t)", "b = tan(t)" , "c = 1; static"])
         self.scaling_rule_c.setCurrentIndex(3)
-
-        # Speed controls
-        speed_options = ["Speed = 5 %", "Speed = 10 %", "Speed = 25 %", "Speed = 50 %", 
-                         "Speed = 100 %", "Speed = 150 %", "Speed = 200 %"]
         
         self.scaling_speed_a = QComboBox(self)
-        self.scaling_speed_a.addItems(speed_options)
+        self.scaling_speed_a.addItems(config.SPEED_OPTIONS)
         self.scaling_speed_a.setCurrentIndex(4)
         
         self.scaling_speed_b = QComboBox(self)
-        self.scaling_speed_b.addItems(speed_options)
+        self.scaling_speed_b.addItems(config.SPEED_OPTIONS)
         self.scaling_speed_b.setCurrentIndex(4)
         
         self.scaling_speed_c = QComboBox(self)
-        self.scaling_speed_c.addItems(speed_options)
+        self.scaling_speed_c.addItems(config.SPEED_OPTIONS)
         self.scaling_speed_c.setCurrentIndex(4)
 
     def create_limits_section(self):
@@ -132,9 +105,11 @@ class ObjectWidget(QWidget):
         # Color map selection
         self.l_cmap = QLabel("Color Map ")
         self.cmap = sorted(get_colormaps().keys())
+        self.cmap = [c for c in self.cmap if c in config.ALLOWED_COLORMAPS] # filter out incompatible colormaps
         self.combo = QComboBox(self)
         self.combo.addItems(self.cmap)
-        self.combo.setCurrentIndex(5)
+        # define default color map
+        self.combo.setCurrentText(config.DEFAULT_CMAP)
 
     def create_info_section(self):
         """Create guidelines section"""
@@ -143,15 +118,7 @@ class ObjectWidget(QWidget):
         self.l_info_title = QLabel("Guidelines")
         self.l_info_title.setStyleSheet("font-size: 20px;")
         
-        info_text = ("You must use the following variables in your equation:\n"
-                    "X, Y, a, b, c\nOther variables are not allowed.\n\n"
-                    "You can use the following np calculations in your formula:\n"
-                    "np.sqrt(), np.exp(), np.log(), np.abs(), np.pi(), np.e()\n"
-                    "np.arctan(), np.arcsin(), np.arccos(), np.arccosh(), np.arcsinh(), \n"
-                    "np.arctanh(), np.sinh(), np.cosh(), np.tanh(), np.sin(), np.cos(), np.tan()\n\n"
-                    "Example functions are available to show you the possibilities.")
-        
-        self.l_info = QLabel(info_text)
+        self.l_info = QLabel(config.INFO_TEXT)
         self.l_info.setStyleSheet("border: 1px solid black;")
 
     def setup_layout(self):
@@ -212,10 +179,10 @@ class ObjectWidget(QWidget):
 
     def pick_example_function(self):
         if self.main_window:
-            self.function_input.setText(EXAMPLE_FUNCTIONS[np.random.randint(len(EXAMPLE_FUNCTIONS))])
+            self.function_input.setText(config.EXAMPLE_FUNCTIONS[np.random.randint(len(config.EXAMPLE_FUNCTIONS))])
             # Check if the randomly picked example function is already displayed
             while self.function_input.text() == self.main_window.plotter.function_input:
-                self.function_input.setText(EXAMPLE_FUNCTIONS[np.random.randint(len(EXAMPLE_FUNCTIONS))])
+                self.function_input.setText(config.EXAMPLE_FUNCTIONS[np.random.randint(len(config.EXAMPLE_FUNCTIONS))])
             
             self.main_window.change_function()
 
@@ -235,8 +202,8 @@ class FunctionPlotterUI(QtWidgets.QMainWindow):
         self.canvas = scene.SceneCanvas(keys='interactive', show=True)
         self.view = self.canvas.central_widget.add_view()
         self.view.camera = 'turntable'
-        self.view.camera.fov = FOV
-        self.view.camera.distance = CAMERA_DISTANCE
+        self.view.camera.fov = config.FOV
+        self.view.camera.distance = config.CAMERA_DISTANCE
 
         # Add the canvas to the splitter
         splitter.addWidget(self.canvas.native)
@@ -284,7 +251,7 @@ class FunctionPlotterUI(QtWidgets.QMainWindow):
         """Validate if the function input contains required variables and no illegal ones"""
         # Filter out allowed special functions
         filtered_input = function_input
-        for func in ALLOWED_CALCULATIONS:
+        for func in config.ALLOWED_CALCULATIONS:
             filtered_input = filtered_input.replace(func, "")
             
         # Check for required variables
