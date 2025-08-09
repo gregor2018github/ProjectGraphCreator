@@ -89,7 +89,29 @@ STYLE_SHEET = """
                      border-radius: 4px; 
                      padding: 4px; 
                  }
-                 /* Use native look for QSpinBox to ensure proper arrows and hitboxes */
+                 /* Ensure checkbox indicator is visible with stylesheet-based rendering */
+                 QCheckBox {
+                     color: #333333;
+                     spacing: 8px;
+                 }
+                 QCheckBox::indicator {
+                     width: 16px;
+                     height: 16px;
+                     border: 1px solid #666666;
+                     border-radius: 3px;
+                     background: #ffffff;
+                 }
+                 QCheckBox::indicator:hover {
+                     border-color: #005a9e;
+                 }
+                 QCheckBox::indicator:checked {
+                     background-color: #0078d7;  /* filled to indicate checked state */
+                     border-color: #005a9e;
+                 }
+                 QCheckBox::indicator:disabled {
+                     background: #eeeeee;
+                     border-color: #aaaaaa;
+                 }
                  QLabel { 
                      color: #333333; 
                  }

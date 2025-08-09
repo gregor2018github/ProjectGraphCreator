@@ -34,6 +34,7 @@ class FunctionPlotter:
 
         # FPS overlay setup
         self._fps_dts = deque(maxlen=10)  # default averaging window
+        self.show_fps = True  # toggleable flag
         self._fps_text = scene.Text(
             '', color='white', font_size=12,
             anchor_x='right', anchor_y='top',
@@ -190,7 +191,8 @@ class FunctionPlotter:
             self._fps_dts = deque(self._fps_dts, maxlen=window)
         self._fps_dts.append(dt)
 
-        if len(self._fps_dts) < window:
+        # Respect toggle and warm-up period
+        if not self.show_fps or len(self._fps_dts) < window:
             self._fps_text.visible = False
             return None
 
@@ -198,3 +200,10 @@ class FunctionPlotter:
         self._fps_text.text = f"FPS: {fps:.1f}"
         self._fps_text.visible = True
         return fps
+
+    # public setter to control FPS overlay
+    def set_show_fps(self, show: bool):
+        self.show_fps = bool(show)
+        # Immediately apply visibility based on current samples
+        has_enough_samples = len(self._fps_dts) == self._fps_dts.maxlen
+        self._fps_text.visible = self.show_fps and has_enough_samples

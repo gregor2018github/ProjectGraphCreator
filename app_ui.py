@@ -2,7 +2,7 @@ import numpy as np
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QVBoxLayout, QPushButton, QWidget, QSplitter, QLabel,
-                           QSpinBox, QComboBox, QGridLayout, QLineEdit, QHBoxLayout)
+                           QSpinBox, QComboBox, QGridLayout, QLineEdit, QHBoxLayout, QCheckBox)
 from vispy import scene
 from vispy.color.colormap import get_colormaps
 
@@ -179,6 +179,14 @@ class ObjectWidget(QWidget):
         # Bottom bar with "Hide Settings" label and the collapse button
         bottom_bar = QHBoxLayout()
         bottom_bar.setContentsMargins(15, 0, 15, 15)
+
+        # Show FPS toggle
+        self.show_fps_checkbox = QCheckBox("Show FPS")
+        self.show_fps_checkbox.setChecked(True)
+        self.show_fps_checkbox.setToolTip("Toggle FPS display on the canvas")
+
+        # Reordered: left align checkbox, right align hide controls
+        bottom_bar.addWidget(self.show_fps_checkbox)
         bottom_bar.addStretch(1)
         bottom_bar.addWidget(self.l_hide_settings)
         bottom_bar.addWidget(self.collapse_button)
@@ -251,6 +259,9 @@ class FunctionPlotterUI(QtWidgets.QMainWindow):
         # Connect UI signals
         self.connect_signals()
 
+        # Ensure initial FPS state matches checkbox
+        self.plotter.set_show_fps(self.props.show_fps_checkbox.isChecked())
+
         # Optional: initial proportions
         self.splitter.setSizes([0, 380, 1000])
 
@@ -260,6 +271,8 @@ class FunctionPlotterUI(QtWidgets.QMainWindow):
         self.props.y_limits.valueChanged.connect(self.update_y_limits)
         self.props.grid_points.valueChanged.connect(self.update_grid_points)
         self.props.combo.currentIndexChanged.connect(self.update_colormap)
+        # connect FPS toggle
+        self.props.show_fps_checkbox.toggled.connect(self.update_show_fps)
 
     # Add the two missing methods to control the collapse/restore behavior
     def minimize_settings(self):
@@ -302,6 +315,10 @@ class FunctionPlotterUI(QtWidgets.QMainWindow):
         self.props.info_label.setText("")
         self.plotter.update_function(function_input)
         
+    # forward checkbox state to plotter
+    def update_show_fps(self, checked=None):
+        self.plotter.set_show_fps(self.props.show_fps_checkbox.isChecked())
+
     def validate_function_input(self, function_input):
         """Validate if the function input contains required variables and no illegal ones"""
         # Filter out allowed special functions
