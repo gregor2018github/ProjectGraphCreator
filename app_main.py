@@ -2,8 +2,8 @@ import sys
 from PyQt6 import QtWidgets
 from vispy import app
 
-from ui import FunctionPlotterUI
-from config import WINDOW_POS, WINDOW_SIZE
+from app_ui import FunctionPlotterUI
+from app_config import WINDOW_POS, WINDOW_SIZE
 
 def main():
     """Entry point for the application."""

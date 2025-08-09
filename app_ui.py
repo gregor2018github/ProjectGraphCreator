@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (QVBoxLayout, QPushButton, QWidget, QSplitter, QLabe
 from vispy import scene
 from vispy.color.colormap import get_colormaps
 
-import config
+import app_config
 from logic import FunctionPlotter
 
 class ObjectWidget(QWidget):
@@ -15,7 +15,7 @@ class ObjectWidget(QWidget):
         self.main_window = main_window
         
         # Added global stylesheet for modern, polished look
-        self.setStyleSheet(config.STYLE_SHEET)
+        self.setStyleSheet(app_config.STYLE_SHEET)
         
         self.create_function_section()
         self.create_scaling_section()
@@ -34,7 +34,7 @@ class ObjectWidget(QWidget):
         self.change_function_button.clicked.connect(self.pick_example_function)
 
         self.l_function_label = QLabel("Define Your Own Function: Z = ...           (must include X, Y, a, b, c)")
-        self.function_input = QLineEdit(config.START_FUNCTION)
+        self.function_input = QLineEdit(app_config.START_FUNCTION)
         self.function_input.setReadOnly(False)
         
         self.l_function_refresher = QPushButton("Refresh")
@@ -43,6 +43,13 @@ class ObjectWidget(QWidget):
         self.info_label = QLabel("")
         self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.info_label.setStyleSheet("color: red")
+
+        # Add a small collapse button on the rim of the settings area
+        self.collapse_button = QPushButton("<")
+        self.collapse_button.setFlat(True)
+        self.collapse_button.setFixedWidth(30)
+        self.collapse_button.setToolTip("Hide settings")
+        self.collapse_button.clicked.connect(self.minimize_settings)
 
     def create_scaling_section(self):
         """Create the dynamic scaling rules section"""
@@ -63,15 +70,15 @@ class ObjectWidget(QWidget):
         self.scaling_rule_c.setCurrentIndex(3)
         
         self.scaling_speed_a = QComboBox(self)
-        self.scaling_speed_a.addItems(config.SPEED_OPTIONS)
+        self.scaling_speed_a.addItems(app_config.SPEED_OPTIONS)
         self.scaling_speed_a.setCurrentIndex(4)
         
         self.scaling_speed_b = QComboBox(self)
-        self.scaling_speed_b.addItems(config.SPEED_OPTIONS)
+        self.scaling_speed_b.addItems(app_config.SPEED_OPTIONS)
         self.scaling_speed_b.setCurrentIndex(4)
         
         self.scaling_speed_c = QComboBox(self)
-        self.scaling_speed_c.addItems(config.SPEED_OPTIONS)
+        self.scaling_speed_c.addItems(app_config.SPEED_OPTIONS)
         self.scaling_speed_c.setCurrentIndex(4)
 
     def create_limits_section(self):
@@ -105,11 +112,11 @@ class ObjectWidget(QWidget):
         # Color map selection
         self.l_cmap = QLabel("Color Map ")
         self.cmap = sorted(get_colormaps().keys())
-        self.cmap = [c for c in self.cmap if c in config.ALLOWED_COLORMAPS] # filter out incompatible colormaps
+        self.cmap = [c for c in self.cmap if c in app_config.ALLOWED_COLORMAPS] # filter out incompatible colormaps
         self.combo = QComboBox(self)
         self.combo.addItems(self.cmap)
         # define default color map
-        self.combo.setCurrentText(config.DEFAULT_CMAP)
+        self.combo.setCurrentText(app_config.DEFAULT_CMAP)
 
     def create_info_section(self):
         """Create guidelines section"""
@@ -118,7 +125,7 @@ class ObjectWidget(QWidget):
         self.l_info_title = QLabel("Guidelines")
         self.l_info_title.setStyleSheet("font-size: 20px;")
         
-        self.l_info = QLabel(config.INFO_TEXT)
+        self.l_info = QLabel(app_config.INFO_TEXT)
         self.l_info.setStyleSheet("border: 1px solid black;")
 
     def setup_layout(self):
@@ -127,7 +134,10 @@ class ObjectWidget(QWidget):
         # Set modern margins and spacing
         gbox.setContentsMargins(15, 15, 15, 15)
         gbox.setSpacing(10)
-        
+
+        # Place collapse button at the top-right corner of the settings grid
+        gbox.addWidget(self.collapse_button, 0, 1, alignment=Qt.AlignmentFlag.AlignRight)
+
         # Function section
         gbox.addWidget(self.l_function_title, 1, 0, 1, 2)
         gbox.addWidget(self.change_function_button, 2, 0, 1, 2)
@@ -153,7 +163,7 @@ class ObjectWidget(QWidget):
         gbox.addWidget(self.x_limits, 14, 1)
         gbox.addWidget(self.l_y_limits, 15, 0)
         gbox.addWidget(self.y_limits, 15, 1)
-        gbox.addWidget(self.l_grid_points, 16, 0, 1, 2)
+        gbox.addWidget(self.l_grid_points, 16, 0)
         gbox.addWidget(self.grid_points, 16, 1)
         gbox.addWidget(self.l_cmap, 17, 0)
         gbox.addWidget(self.combo, 17, 1)
@@ -169,6 +179,10 @@ class ObjectWidget(QWidget):
 
         self.setLayout(vbox)
 
+    def minimize_settings(self):
+        if self.main_window:
+            self.main_window.minimize_settings()
+
     def change_color(self):
         if self.main_window:
             self.main_window.change_color()
@@ -179,10 +193,10 @@ class ObjectWidget(QWidget):
 
     def pick_example_function(self):
         if self.main_window:
-            self.function_input.setText(config.EXAMPLE_FUNCTIONS[np.random.randint(len(config.EXAMPLE_FUNCTIONS))])
+            self.function_input.setText(app_config.EXAMPLE_FUNCTIONS[np.random.randint(len(app_config.EXAMPLE_FUNCTIONS))])
             # Check if the randomly picked example function is already displayed
             while self.function_input.text() == self.main_window.plotter.function_input:
-                self.function_input.setText(config.EXAMPLE_FUNCTIONS[np.random.randint(len(config.EXAMPLE_FUNCTIONS))])
+                self.function_input.setText(app_config.EXAMPLE_FUNCTIONS[np.random.randint(len(app_config.EXAMPLE_FUNCTIONS))])
             
             self.main_window.change_function()
 
@@ -191,22 +205,38 @@ class FunctionPlotterUI(QtWidgets.QMainWindow):
         super().__init__()
 
         # Setup splitter for UI sections
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        self.setCentralWidget(splitter)
+        self.splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.setCentralWidget(self.splitter)
+
+        # A thin restore handle on the far left (hidden by default)
+        self.restore_handle = QWidget()
+        self.restore_handle.setFixedWidth(20)
+        rh_layout = QVBoxLayout(self.restore_handle)
+        rh_layout.setContentsMargins(0, 0, 0, 0)
+        rh_layout.addStretch()
+        self.restore_button = QPushButton(">");
+        self.restore_button.setFlat(True)
+        self.restore_button.setFixedWidth(18)
+        self.restore_button.setToolTip("Show settings")
+        self.restore_button.clicked.connect(self.restore_settings)
+        rh_layout.addWidget(self.restore_button, alignment=Qt.AlignmentFlag.AlignHCenter)
+        rh_layout.addStretch()
+        self.restore_handle.setVisible(False)
 
         # Setup object widget (controls panel)
         self.props = ObjectWidget(self, main_window=self)
-        splitter.addWidget(self.props)
 
         # Setup canvas for 3D visualization
         self.canvas = scene.SceneCanvas(keys='interactive', show=True)
         self.view = self.canvas.central_widget.add_view()
         self.view.camera = 'turntable'
-        self.view.camera.fov = config.FOV
-        self.view.camera.distance = config.CAMERA_DISTANCE
+        self.view.camera.fov = app_config.FOV
+        self.view.camera.distance = app_config.CAMERA_DISTANCE
 
-        # Add the canvas to the splitter
-        splitter.addWidget(self.canvas.native)
+        # Add widgets to the splitter in order: [restore handle | settings | canvas]
+        self.splitter.addWidget(self.restore_handle)
+        self.splitter.addWidget(self.props)
+        self.splitter.addWidget(self.canvas.native)
 
         # Create the plotter that handles the 3D function
         self.plotter = FunctionPlotter(self.view, self.props)
@@ -214,12 +244,30 @@ class FunctionPlotterUI(QtWidgets.QMainWindow):
         # Connect UI signals
         self.connect_signals()
 
+        # Optional: initial proportions
+        self.splitter.setSizes([0, 380, 1000])
+
     def connect_signals(self):
         """Connect UI controls to update methods"""
         self.props.x_limits.valueChanged.connect(self.update_x_limits)
         self.props.y_limits.valueChanged.connect(self.update_y_limits)
         self.props.grid_points.valueChanged.connect(self.update_grid_points)
         self.props.combo.currentIndexChanged.connect(self.update_colormap)
+
+    # Add the two missing methods to control the collapse/restore behavior
+    def minimize_settings(self):
+        # Hide the settings pane, show the left restore handle, give the rest to the canvas
+        self.props.setVisible(False)
+        self.restore_handle.setVisible(True)
+        handle_w = max(1, self.restore_handle.width() or 20)
+        self.splitter.setSizes([handle_w, 0, max(1, self.width() - handle_w)])
+
+    def restore_settings(self):
+        # Show the settings pane again and hide the left handle
+        self.restore_handle.setVisible(False)
+        self.props.setVisible(True)
+        props_w = 380
+        self.splitter.setSizes([0, props_w, max(1, self.width() - props_w)])
 
     def update_x_limits(self):
         self.plotter.update_x_limits(self.props.x_limits.value())
@@ -251,7 +299,7 @@ class FunctionPlotterUI(QtWidgets.QMainWindow):
         """Validate if the function input contains required variables and no illegal ones"""
         # Filter out allowed special functions
         filtered_input = function_input
-        for func in config.ALLOWED_CALCULATIONS:
+        for func in app_config.ALLOWED_CALCULATIONS:
             filtered_input = filtered_input.replace(func, "")
             
         # Check for required variables

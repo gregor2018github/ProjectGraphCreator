@@ -81,11 +81,13 @@ STYLE_SHEET = """
                  QPushButton:hover { 
                      background-color: #005a9e; 
                  }
-                 QLineEdit, QSpinBox, QComboBox { 
+                 /* Keep shared styling for line edits and combo boxes */
+                 QLineEdit, QComboBox { 
                      border: 1px solid #ccc; 
                      border-radius: 4px; 
                      padding: 4px; 
                  }
+                 /* Use native look for QSpinBox to ensure proper arrows and hitboxes */
                  QLabel { 
                      color: #333333; 
                  }
@@ -109,6 +111,31 @@ SPEED_OPTIONS = ["Speed = 5 %",
                  "Speed = 150 %", 
                  "Speed = 200 %"]
 
+# Possible colormaps for the plot, some others are not compatible with the program
+ALLOWED_COLORMAPS = ["GrBu",
+                     "GrBu_d",
+                     "PuGr",
+                     "RdBu",
+                     "RdYeBuCy",
+                     "autumn",
+                     "blues",
+                     "cool",
+                     "coolwarm",
+                     "cubehelix",
+                     "diverging",
+                     "greens",
+                     "hsl",
+                     "husl",
+                     "light_blues",
+                     "orange",
+                     "reds",
+                     "single_hue",
+                     "spring",
+                     "summer",
+                     "viridis"]
+
+# Starting colormap
+DEFAULT_CMAP = "viridis"
 # Possible colormaps for the plot, some others are not compatible with the program
 ALLOWED_COLORMAPS = ["GrBu",
                      "GrBu_d",
