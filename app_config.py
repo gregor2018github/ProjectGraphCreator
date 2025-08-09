@@ -67,12 +67,20 @@ ALLOWED_CALCULATIONS = ["np.arcsinh", "np.arccosh", "np.arctanh",
 
 STANDARD_COLOR = "#0078d7"
 STANDARD_COLOR_DARK = "#005a9e"
+STANDARD_BACKGROUND_COLOR = "#ebebeb"#f9f9f9
 
 STYLE_SHEET = """
                  QWidget { 
-                     background-color: #f9f9f9; 
+                     background-color: #ebebeb; 
                      font-family: 'Segoe UI', sans-serif; 
                  }
+                 /* Subtle section cards */
+                 QFrame#sectionPanel {
+                     background-color: #ffffff;
+                     border: 1px solid #e5e5e5;
+                     border-radius: 6px;
+                 }
+
                  QPushButton { 
                      background-color: #0078d7; 
                      color: white; 
@@ -114,6 +122,7 @@ STYLE_SHEET = """
                  }
                  QLabel { 
                      color: #333333; 
+                     background-color: transparent;  /* ensure labels show white panel background */
                  }
               """
 

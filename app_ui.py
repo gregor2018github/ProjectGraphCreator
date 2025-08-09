@@ -2,7 +2,7 @@ import numpy as np
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QVBoxLayout, QPushButton, QWidget, QSplitter, QLabel,
-                           QSpinBox, QComboBox, QGridLayout, QLineEdit, QHBoxLayout, QCheckBox)
+                           QSpinBox, QComboBox, QGridLayout, QLineEdit, QHBoxLayout, QCheckBox, QFrame)
 from vispy import scene
 from vispy.color.colormap import get_colormaps
 
@@ -132,60 +132,78 @@ class ObjectWidget(QWidget):
 
     def setup_layout(self):
         """Position widgets in the layout"""
-        gbox = QGridLayout()
-        # Set modern margins and spacing
-        gbox.setContentsMargins(15, 15, 15, 15)
-        gbox.setSpacing(10)
 
-        # Function section
-        gbox.addWidget(self.l_function_title, 1, 0, 1, 2)
-        gbox.addWidget(self.change_function_button, 2, 0, 1, 2)
-        gbox.addWidget(self.l_function_label, 3, 0)
-        gbox.addWidget(self.function_input, 4, 0)
-        gbox.addWidget(self.l_function_refresher, 4, 1)
-        gbox.addWidget(self.info_label, 5, 0, 1, 2)
+        # Function Definition section
+        sec_fn = QFrame()
+        sec_fn.setObjectName("sectionPanel")
+        fn_box = QGridLayout(sec_fn)
+        fn_box.setContentsMargins(12, 12, 12, 12)
+        fn_box.setSpacing(8)
+        fn_box.addWidget(self.l_function_title, 0, 0, 1, 2)
+        fn_box.addWidget(self.change_function_button, 1, 0, 1, 2)
+        fn_box.addWidget(self.l_function_label, 2, 0)
+        fn_box.addWidget(self.function_input, 3, 0)
+        fn_box.addWidget(self.l_function_refresher, 3, 1)
+        fn_box.addWidget(self.info_label, 4, 0, 1, 2)
 
-        # Scaling section
-        gbox.addWidget(self.l_scaling_placeholder, 6, 0, 1, 2)
-        gbox.addWidget(self.l_scaling_title, 7, 0, 1, 2)
-        gbox.addWidget(self.scaling_rule_a, 9, 0)
-        gbox.addWidget(self.scaling_speed_a, 9, 1)
-        gbox.addWidget(self.scaling_rule_b, 10, 0)
-        gbox.addWidget(self.scaling_speed_b, 10, 1)
-        gbox.addWidget(self.scaling_rule_c, 11, 0)
-        gbox.addWidget(self.scaling_speed_c, 11, 1)
+        # Dynamic Scaling Rules section
+        sec_sc = QFrame()
+        sec_sc.setObjectName("sectionPanel")
+        sc_box = QGridLayout(sec_sc)
+        sc_box.setContentsMargins(12, 12, 12, 12)
+        sc_box.setSpacing(8)
+        sc_box.addWidget(self.l_scaling_title, 0, 0, 1, 2)
+        sc_box.addWidget(self.scaling_rule_a, 1, 0)
+        sc_box.addWidget(self.scaling_speed_a, 1, 1)
+        sc_box.addWidget(self.scaling_rule_b, 2, 0)
+        sc_box.addWidget(self.scaling_speed_b, 2, 1)
+        sc_box.addWidget(self.scaling_rule_c, 3, 0)
+        sc_box.addWidget(self.scaling_speed_c, 3, 1)
 
-        # Limits section
-        gbox.addWidget(self.l_limits_placeholder, 12, 0, 1, 2)
-        gbox.addWidget(self.l_limits_title, 13, 0, 1, 2)
-        gbox.addWidget(self.l_x_limits, 14, 0)
-        gbox.addWidget(self.x_limits, 14, 1)
-        gbox.addWidget(self.l_y_limits, 15, 0)
-        gbox.addWidget(self.y_limits, 15, 1)
-        gbox.addWidget(self.l_grid_points, 16, 0)
-        gbox.addWidget(self.grid_points, 16, 1)
-        gbox.addWidget(self.l_cmap, 17, 0)
-        gbox.addWidget(self.combo, 17, 1)
+        # Grid Limits and Color Map section
+        sec_lim = QFrame()
+        sec_lim.setObjectName("sectionPanel")
+        lim_box = QGridLayout(sec_lim)
+        lim_box.setContentsMargins(12, 12, 12, 12)
+        lim_box.setSpacing(8)
+        lim_box.addWidget(self.l_limits_title, 0, 0, 1, 2)
+        lim_box.addWidget(self.l_x_limits, 1, 0)
+        lim_box.addWidget(self.x_limits, 1, 1)
+        lim_box.addWidget(self.l_y_limits, 2, 0)
+        lim_box.addWidget(self.y_limits, 2, 1)
+        lim_box.addWidget(self.l_grid_points, 3, 0)
+        lim_box.addWidget(self.grid_points, 3, 1)
+        lim_box.addWidget(self.l_cmap, 4, 0)
+        lim_box.addWidget(self.combo, 4, 1)
 
-        # Info section
-        gbox.addWidget(self.l_info_placeholder, 18, 0, 1, 2)
-        gbox.addWidget(self.l_info_title, 19, 0, 1, 2)
-        gbox.addWidget(self.l_info, 20, 0, 1, 2)
+        # Guidelines section
+        sec_info = QFrame()
+        sec_info.setObjectName("sectionPanel")
+        info_box = QGridLayout(sec_info)
+        info_box.setContentsMargins(12, 12, 12, 12)
+        info_box.setSpacing(8)
+        info_box.addWidget(self.l_info_title, 0, 0, 1, 2)
+        info_box.addWidget(self.l_info, 1, 0, 1, 2)
 
+        # Main vertical stack of sections
         vbox = QVBoxLayout()
-        vbox.addLayout(gbox)
+        vbox.setContentsMargins(15, 15, 15, 0)
+        vbox.setSpacing(12)
+        vbox.addWidget(sec_fn)
+        vbox.addWidget(sec_sc)
+        vbox.addWidget(sec_lim)
+        vbox.addWidget(sec_info)
         vbox.addStretch(1)
 
-        # Bottom bar with "Hide Settings" label and the collapse button
+        # Bottom bar
         bottom_bar = QHBoxLayout()
         bottom_bar.setContentsMargins(15, 0, 15, 15)
 
-        # Show FPS toggle
+        # instantiate the checkbox before using it
         self.show_fps_checkbox = QCheckBox("Show FPS")
         self.show_fps_checkbox.setChecked(True)
         self.show_fps_checkbox.setToolTip("Toggle FPS display on the canvas")
 
-        # Reordered: left align checkbox, right align hide controls
         bottom_bar.addWidget(self.show_fps_checkbox)
         bottom_bar.addStretch(1)
         bottom_bar.addWidget(self.l_hide_settings)
