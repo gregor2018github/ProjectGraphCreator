@@ -65,7 +65,9 @@ ALLOWED_CALCULATIONS = ["np.arcsinh", "np.arccosh", "np.arctanh",
                         "np.sqrt", "np.exp", "np.log", "np.abs", 
                         "np.pi", "np.e"]
 
-# Style sheet for PyQt6 widgets
+STANDARD_COLOR = "#0078d7"
+STANDARD_COLOR_DARK = "#005a9e"
+
 STYLE_SHEET = """
                  QWidget { 
                      background-color: #f9f9f9; 
@@ -154,7 +156,6 @@ ALLOWED_COLORMAPS = ["GrBu",
                      "light_blues",
                      "orange",
                      "reds",
-                     "single_hue",
                      "spring",
                      "summer",
                      "viridis"]

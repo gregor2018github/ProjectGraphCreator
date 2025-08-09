@@ -2,7 +2,7 @@ import numpy as np
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QVBoxLayout, QPushButton, QWidget, QSplitter, QLabel,
-                           QSpinBox, QComboBox, QGridLayout, QLineEdit)
+                           QSpinBox, QComboBox, QGridLayout, QLineEdit, QHBoxLayout)
 from vispy import scene
 from vispy.color.colormap import get_colormaps
 
@@ -44,12 +44,14 @@ class ObjectWidget(QWidget):
         self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.info_label.setStyleSheet("color: red")
 
-        # Add a small collapse button on the rim of the settings area
+        # Add a small collapse button for hiding settings (will be placed at bottom)
         self.collapse_button = QPushButton("<")
         self.collapse_button.setFlat(True)
         self.collapse_button.setFixedWidth(30)
         self.collapse_button.setToolTip("Hide settings")
         self.collapse_button.clicked.connect(self.minimize_settings)
+        # Label shown next to the button
+        self.l_hide_settings = QLabel("Hide Settings")
 
     def create_scaling_section(self):
         """Create the dynamic scaling rules section"""
@@ -135,9 +137,6 @@ class ObjectWidget(QWidget):
         gbox.setContentsMargins(15, 15, 15, 15)
         gbox.setSpacing(10)
 
-        # Place collapse button at the top-right corner of the settings grid
-        gbox.addWidget(self.collapse_button, 0, 1, alignment=Qt.AlignmentFlag.AlignRight)
-
         # Function section
         gbox.addWidget(self.l_function_title, 1, 0, 1, 2)
         gbox.addWidget(self.change_function_button, 2, 0, 1, 2)
@@ -177,6 +176,14 @@ class ObjectWidget(QWidget):
         vbox.addLayout(gbox)
         vbox.addStretch(1)
 
+        # Bottom bar with "Hide Settings" label and the collapse button
+        bottom_bar = QHBoxLayout()
+        bottom_bar.setContentsMargins(15, 0, 15, 15)
+        bottom_bar.addStretch(1)
+        bottom_bar.addWidget(self.l_hide_settings)
+        bottom_bar.addWidget(self.collapse_button)
+        vbox.addLayout(bottom_bar)
+
         self.setLayout(vbox)
 
     def minimize_settings(self):
@@ -210,13 +217,13 @@ class FunctionPlotterUI(QtWidgets.QMainWindow):
 
         # A thin restore handle on the far left (hidden by default)
         self.restore_handle = QWidget()
-        self.restore_handle.setFixedWidth(20)
+        self.restore_handle.setFixedWidth(35)  # widen to accommodate styled button
         rh_layout = QVBoxLayout(self.restore_handle)
-        rh_layout.setContentsMargins(0, 0, 0, 0)
+        rh_layout.setContentsMargins(3, 0, 0, 0)
         rh_layout.addStretch()
-        self.restore_button = QPushButton(">");
-        self.restore_button.setFlat(True)
-        self.restore_button.setFixedWidth(18)
+        self.restore_button = QPushButton(">")
+        self.restore_button.setFlat(False)     # use styled QPushButton (blue bg, white text)
+        self.restore_button.setFixedSize(30, 26)
         self.restore_button.setToolTip("Show settings")
         self.restore_button.clicked.connect(self.restore_settings)
         rh_layout.addWidget(self.restore_button, alignment=Qt.AlignmentFlag.AlignHCenter)
@@ -312,4 +319,5 @@ class FunctionPlotterUI(QtWidgets.QMainWindow):
         if illegal_chars:
             return False, f"The function input contains other variables than X, Y, a, b, c. Remove the character {illegal_chars[0]}."
             
+        return True, ""
         return True, ""
