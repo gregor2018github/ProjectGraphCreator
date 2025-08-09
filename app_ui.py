@@ -91,17 +91,17 @@ class ObjectWidget(QWidget):
         self.l_limits_title.setStyleSheet("font-size: 20px;")
 
         # X limits
-        self.l_x_limits = QLabel("X Limits (between 1 and 10)")
+        self.l_x_limits = QLabel("X Limits (between 1 and 100)")
         self.x_limits = QSpinBox()
         self.x_limits.setMinimum(1)
-        self.x_limits.setMaximum(10)
+        self.x_limits.setMaximum(100)
         self.x_limits.setValue(2)
 
         # Y limits
-        self.l_y_limits = QLabel("Y Limits (between 1 and 10)")
+        self.l_y_limits = QLabel("Y Limits (between 1 and 100)")
         self.y_limits = QSpinBox()
         self.y_limits.setMinimum(1)
-        self.y_limits.setMaximum(10)
+        self.y_limits.setMaximum(100)
         self.y_limits.setValue(2)
 
         # Grid resolution

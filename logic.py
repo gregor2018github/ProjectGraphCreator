@@ -2,13 +2,16 @@ import numpy as np
 from vispy import app
 from vispy.scene import visuals
 from vispy.color.colormap import get_colormap
+from vispy import scene  # for Text overlay
+from collections import deque  # for rolling dt window
 
 class FunctionPlotter:
     def __init__(self, view, props):
         """Initialize the function plotter with view and UI properties"""
         self.view = view
         self.props = props
-        
+        self.canvas = self.view.canvas  # access canvas for overlay and resize
+
         # Initialize parameters
         self.time = 0
         self.a = 1
@@ -28,6 +31,17 @@ class FunctionPlotter:
         self.X, self.Y, self.Z = self.create_function(self.a, self.b, self.c)
         self.setup_surface_plot()
         self.setup_timer()
+
+        # FPS overlay setup
+        self._fps_dts = deque(maxlen=10)  # default averaging window
+        self._fps_text = scene.Text(
+            '', color='white', font_size=12,
+            anchor_x='right', anchor_y='top',
+            parent=self.canvas.scene
+        )
+        self._fps_text.visible = False
+        self._position_fps_text()
+        self.canvas.events.resize.connect(self._on_canvas_resize)
         
     def setup_surface_plot(self):
         """Setup the surface plot visualization"""
@@ -109,6 +123,9 @@ class FunctionPlotter:
             self.update_parameters()
             self.X, self.Y, self.Z = self.create_function(self.a, self.b, self.c)
             self.plot_function(self.X, self.Y, self.Z)
+
+            # update FPS overlay (default averaging window = 10)
+            self._update_fps(event.dt, window=10)
         except Exception as e:
             print(f"Error during update: {e}")
     
@@ -151,3 +168,33 @@ class FunctionPlotter:
             self.c = np.tan(self.time * speed_percent_c)
         else:  # static
             self.c = 1
+
+    # helpers for FPS overlay
+    def _position_fps_text(self, padding=10):
+        w, h = self.canvas.size
+        self._fps_text.pos = (w - padding, h - padding)
+
+    def _on_canvas_resize(self, event):
+        self._position_fps_text()
+
+    def _update_fps(self, dt, window=10):
+        """
+        Update the rolling FPS display.
+        - window: number of frames to average over (change this easily later).
+        - hides the text until 'window' samples are collected.
+        """
+        if dt is None or dt <= 0:
+            return None
+        # Ensure deque matches desired window
+        if self._fps_dts.maxlen != window:
+            self._fps_dts = deque(self._fps_dts, maxlen=window)
+        self._fps_dts.append(dt)
+
+        if len(self._fps_dts) < window:
+            self._fps_text.visible = False
+            return None
+
+        fps = len(self._fps_dts) / sum(self._fps_dts)
+        self._fps_text.text = f"FPS: {fps:.1f}"
+        self._fps_text.visible = True
+        return fps
